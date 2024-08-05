@@ -120,7 +120,7 @@ def on_lint_button_clicked():
     for path,info in state_path_info.items():
         try:
             info.encoding = zipdetect(path)
-            info.status= ZipValid.VALID if info.encoding=='utf8' else ZipValid.INVALID
+            info.status= ZipValid.VALID if ziplint(path) else ZipValid.INVALID
         except AssertionError as err:
             info.status = ZipValid.BROKEN
             messagebox.showerror("Warning", str(err))
@@ -169,7 +169,7 @@ if __name__=='__main__':
 
     lintButton = Button(frml, text="Lint",    command = on_lint_button_clicked )
     lintButton.pack()
-    convertButton = Button(frml, text="Convert", command = on_conv_button_clicked )
+    convertButton = Button(frml, text="Convert All", command = on_conv_button_clicked )
     convertButton.pack()
     Button(frml, text="Clear",   command = ui_action(state_path_info.clear)).pack()
     state_overwrite_compression = BooleanVar()

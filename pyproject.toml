@@ -13,6 +13,12 @@ requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "AGPL-3.0-only"}
 
-
 [tool.pdm]
 distribution = false
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pyinstaller>=6.9.0",
+]
+
+

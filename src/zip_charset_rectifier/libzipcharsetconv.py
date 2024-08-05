@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import warnings
 import logging
+import rarfile
+
 
 SUPPORTED_FORMAT = ['.zip', '.rar']
 
@@ -15,7 +17,8 @@ def _polyfill_pathwalk(p :Path):
         warnings.warn(UserWarning("Path.walk is not support, using os.walk instead"))
         return ( (Path(dirpath), dirnames, filenames) for dirpath, dirnames, filenames in os.walk(p) )
 
-def zipdetect(file_path :Path, possible_encoding :set[str]={'utf8', 'shift-jis', 'gbk'}) -> str | None:
+def zipdetect(file_path :Path, possible_encoding :tuple[str]=('utf8', 'shift-jis', 'gbk')) -> str | None:
+    # UTF8 should be the first, since ANSI(CP437) will also be gbk or sjis
     for encoding in possible_encoding:
         if ziplint(file_path, encoding):
             return encoding
@@ -32,12 +35,11 @@ def ziplint(file_path :Path, encoding :str='utf8', password :bytes | None = None
             except UnicodeDecodeError as err:
                 return False
         case ".rar":
-            import rarfile
             try:
                 with rarfile.RarFile(file_path, mode='r', charset=encoding) as f:
                     if f.needs_password() and (password is not None):
                         f.setpassword(password)
-                    assert f.testzip() is None, f'{file_path}:{f.testrar()} is broken!'
+                    assert f.testrar() is None, f'{file_path}:{f.testrar()} is broken!'
                     for i in f.namelist():
                         i
             except UnicodeDecodeError as err:
